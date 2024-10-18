@@ -1,0 +1,124 @@
+import 'package:flutter/material.dart';
+import 'dart:async'; 
+import 'dart:math';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Word Memory Game',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: WordMemoryGame(),
+    );
+  }
+}
+
+class WordMemoryGame extends StatefulWidget {
+  @override
+  _WordMemoryGameState createState() => _WordMemoryGameState();
+}
+
+class _WordMemoryGameState extends State<WordMemoryGame> {
+  final List<String> words = ['Cat', 'Dog', 'Bird', 'Mouse']; 
+  String? currentWord;
+  final TextEditingController _controller = TextEditingController();
+  bool _wordVisible = true; 
+
+  @override
+  void initState() {
+    super.initState();
+    _getRandomWord();
+  }
+
+  void _getRandomWord() {
+    currentWord = (words..shuffle()).first;
+    _controller.clear(); 
+    _wordVisible = true; 
+    setState(() {}); 
+
+    Future.delayed(Duration(seconds: 5), () {
+      setState(() {
+        _wordVisible = false; 
+      });
+    });
+  }
+
+  void _checkAnswer() {
+    String answer = _controller.text;
+    if (currentWord?.toLowerCase() == answer.toLowerCase()) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Correct!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _getRandomWord();
+              },
+              child: Text('Continue'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Incorrect!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Try Again'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Word Memory Game')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Remember this word:',
+              style: TextStyle(fontSize: 24),
+            ),
+            SizedBox(height: 20),
+            if (_wordVisible) ...[ 
+              Text(
+                currentWord ?? '',
+                style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+              ),
+            ],
+            SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                controller: _controller,
+                textInputAction: TextInputAction.done, 
+                onEditingComplete: () {
+                  _checkAnswer();
+                  FocusScope.of(context).unfocus(); 
+                },
+                decoration: InputDecoration(labelText: 'Your answer'),
+                keyboardType: TextInputType.text, 
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
